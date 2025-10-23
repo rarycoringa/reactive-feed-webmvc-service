@@ -1,30 +1,32 @@
 package br.edu.ufrn.feed.client;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import br.edu.ufrn.feed.record.PostDTO;
-import reactor.core.publisher.Flux;
 
 @Component
 public class PostRestAPIClient implements PostClient {
 
-    private final WebClient client;
+    private final RestTemplate restTemplate;
     
     public PostRestAPIClient(
-        WebClient.Builder builder,
+        @LoadBalanced RestTemplate restTemplate,
         @Value("${post.restapi.base-url}") String baseUrl
     ) {
-        this.client = builder.baseUrl(baseUrl).build();
+        this.restTemplate = restTemplate;
+        this.restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(baseUrl));
     }
 
     @Override
-    public Flux<PostDTO> getAll() {
-        return client.get()
-            .uri("/posts")
-            .retrieve()
-            .bodyToFlux(PostDTO.class);
+    public List<PostDTO> getAll() {
+        return Arrays.asList(restTemplate.getForObject("/posts", PostDTO[].class));
     }
 
 }

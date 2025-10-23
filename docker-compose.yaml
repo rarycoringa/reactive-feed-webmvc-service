@@ -1,7 +1,7 @@
 services:
-  feed-webflux:
+  feed-webmvc:
     build: .
-    container_name: feed-webflux
+    container_name: feed-webmvc
     environment:
       - SERVER_PORT=8383
     ports:

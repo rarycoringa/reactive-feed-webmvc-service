@@ -1,27 +1,32 @@
 package br.edu.ufrn.feed.client;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.graphql.client.HttpGraphQlClient;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.graphql.client.HttpSyncGraphQlClient;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import br.edu.ufrn.feed.record.PostDTO;
-import reactor.core.publisher.Flux;
 
 @Component
 public class PostGraphQLClient implements PostClient {
 
-    private final HttpGraphQlClient client;
+    private final HttpSyncGraphQlClient client;
 
     public PostGraphQLClient(
-        WebClient.Builder builder,
+        @LoadBalanced RestTemplate restTemplate,
         @Value("${post.graphql.base-url}") String baseUrl
     ) {
-        this.client = HttpGraphQlClient.builder(builder.baseUrl(baseUrl)).build();
+        restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(baseUrl));
+        this.client = HttpSyncGraphQlClient.create(RestClient.create(restTemplate));
     }
 
     @Override
-    public Flux<PostDTO> getAll() {
+    public List<PostDTO> getAll() {
         String query = """
             query GetAll {
                 getAll {
@@ -43,7 +48,7 @@ public class PostGraphQLClient implements PostClient {
         return client.document(query)
             .retrieve("getAll")
             .toEntityList(PostDTO.class)
-            .flatMapMany(Flux::fromIterable);
+            .block();
     }
 
 }
