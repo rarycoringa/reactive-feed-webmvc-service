@@ -1,5 +1,6 @@
 package br.edu.ufrn.feed.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,9 +23,8 @@ public class FeedService {
         if (allPosts == null || allPosts.isEmpty()) {
             return Collections.emptyList();
         }
-        
         int end = Math.min(limit, allPosts.size());
-        return allPosts.subList(0, end);
+        return new ArrayList<>(allPosts.subList(0, end));
     }
 
 }

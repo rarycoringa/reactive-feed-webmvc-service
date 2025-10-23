@@ -2,7 +2,6 @@ package br.edu.ufrn.feed.controller;
 
 import java.util.List;
 
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,7 +21,7 @@ public class FeedRestAPIController {
         this.feedService = new FeedService(client);
     }
 
-    @GetMapping(params = "limit", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(params = "limit")
     public List<PostDTO> getLatestPosts(@RequestParam("limit") Integer limit) {
         return feedService.getLatestPosts(limit);
     }
